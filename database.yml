@@ -1,0 +1,37 @@
+---
+- name: Deploy, configure, and populate Postgres 10
+  # Use groups from hosts and metadata so override can be used in the dynamic inventory. Makes for a cleaner inventory
+  hosts: 
+    - database_servers
+    - meta-database_servers_AnsibleGroup
+
+  become: true
+  gather_facts: false
+  tags:
+    - database_servers
+
+  vars:
+    postgres_users:
+      - name: flask
+        password: redhat
+        database: flask_db
+        state: present
+        priv: ALL
+    postgres_databases:
+      - name: flask_db
+        owner: flask
+      - name: books_store
+        owner: flask
+    postgres_port: 5432
+    firewall_tcp_ports:
+      - "{{ postgres_port }}"
+
+  roles:
+    - dns
+    - register_satellite
+    - firewall
+    - postgres-server
+
+  pre_tasks:
+    - name: Wait 600 seconds for target connection to become reachable/usable
+      wait_for_connection:

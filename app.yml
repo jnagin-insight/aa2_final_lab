@@ -1,0 +1,30 @@
+---
+- name: Deploy, configure, and populate flask repo and virtualenv
+  # Use groups from hosts and metadata so override can be used in the dynamic inventory. Makes for a cleaner inventory
+  hosts: 
+   - app_servers
+   - meta-app_servers_AnsibleGroup
+   
+  become: true
+  gather_facts: false
+  tags:
+    - application_servers
+    - flask
+
+  vars:
+    flask_app_name: resource_hub
+    flask_repo: https://github.com/tonykay/resource_hub.git
+    flask_scm_ref: main
+    flask_app_lauch_script: /usr/local/bin/launch_resource_hub
+    firewall_tcp_ports:
+      - 8080
+
+  roles:
+    - dns
+    - register_satellite
+    - firewall
+    - flask
+
+  pre_tasks:
+    - name: Wait 600 seconds for target connection to become reachable/usable
+      wait_for_connection:

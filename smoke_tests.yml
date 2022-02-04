@@ -1,0 +1,25 @@
+---
+- name: Test Web Servers -> Database Servers
+  # Use groups from hosts and metadata so override can be used in the dynamic inventory. Makes for a cleaner inventory
+  hosts: 
+    - app_servers
+    - meta-app_servers_AnsibleGroup
+  gather_facts: true
+  become: true
+  tags:
+    - smoketest
+
+  roles:
+    - smoke_database
+    
+
+- name: Test Web Servers through Load Balancers
+  hosts: localhost
+  become: false
+  gather_facts: false
+  tags:
+    - smoketest
+  
+  roles:
+    - smoke_web
+    

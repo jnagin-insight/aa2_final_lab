@@ -1,0 +1,25 @@
+---
+- name: Deploy haproxy load balancer
+  # Use groups from hosts and metadata so override can be used in the dynamic inventory. Makes for a cleaner inventory
+  hosts:
+    - load_balancers
+    - meta-load_balancers_AnsibleGroup
+    
+  gather_facts: false 
+  become: true
+  tags:
+    - load_balancers
+  
+  vars:
+    firewall_tcp_ports:
+      - 80
+
+  roles:
+    - dns
+    - register_satellite
+    - firewall
+    - haproxy
+
+  pre_tasks:
+    - name: Wait 600 seconds for target connection to become reachable/usable
+      wait_for_connection:
